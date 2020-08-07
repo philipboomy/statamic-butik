@@ -60,6 +60,11 @@ class Item
     public Variant $variant;
 
     /**
+     * The tax amount of the product
+     */
+    public string $taxAmount;
+
+    /**
      * The taxrate of the product
      */
     public int $taxRate;
@@ -93,6 +98,7 @@ class Item
         $this->images          = $this->product->augmentedValue('images')->value();
         $this->description     = $this->limitedDescription();
         $this->taxRate         = $item->tax->percentage;
+        $this->taxAmount       = $item->tax_amount;
         $this->singlePrice     = $item->price;
         $this->totalPrice      = $this->totalPrice();
         $this->shippingProfile = $item->shippingProfile;
@@ -175,6 +181,11 @@ class Item
         $this->totalPrice     = $this->totalPrice();
     }
 
+    protected function isVariant()
+    {
+        return Str::contains($this->slug, '::');
+    }
+
     private function limitedDescription()
     {
         return Str::limit($this->product()->description, 100, '...');
@@ -199,11 +210,6 @@ class Item
         return $this->getQuantity() <= $this->item()->stock;
     }
 
-    protected function isVariant()
-    {
-        return Str::contains($this->slug, '::');
-    }
-
     private function defineItemData()
     {
         if ($this->isVariant()) {
@@ -214,16 +220,18 @@ class Item
         }
     }
 
-    private function productSlug() {
-        if (! $this->isVariant()) {
+    private function productSlug()
+    {
+        if (!$this->isVariant()) {
             return $this->slug;
         }
 
         return Str::of($this->slug)->explode('::')[0];
     }
 
-    private function variantSlug() {
-        if (! $this->isVariant()) {
+    private function variantSlug()
+    {
+        if (!$this->isVariant()) {
             return null;
         }
 
@@ -232,8 +240,8 @@ class Item
 
     private function item()
     {
-       return $this->isVariant() ?
-           $this->variant :
-           $this->product;
+        return $this->isVariant() ?
+            $this->variant :
+            $this->product;
     }
 }
