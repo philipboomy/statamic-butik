@@ -98,7 +98,7 @@ class Item
         $this->images          = $this->product->augmentedValue('images')->value();
         $this->description     = $this->limitedDescription();
         $this->taxRate         = $item->tax->percentage;
-        $this->taxAmount       = $item->tax_amount;
+        $this->taxAmount       = $this->totalTaxAmount();
         $this->singlePrice     = $item->price;
         $this->totalPrice      = $this->totalPrice();
         $this->shippingProfile = $item->shippingProfile;
@@ -179,6 +179,7 @@ class Item
         $this->singlePrice    = $this->item()->price;
         $this->description    = $this->limitedDescription();
         $this->totalPrice     = $this->totalPrice();
+        $this->taxAmount      = $this->totalTaxAmount();
     }
 
     protected function isVariant()
@@ -198,6 +199,13 @@ class Item
         return Cache::remember($cacheName, 300, function () {
             return Product::find($this->productSlug());
         });
+    }
+
+    private function totalTaxAmount()
+    {
+        $totalPrice = $this->makeAmountSaveable($this->totalPrice());
+        $tax = $totalPrice * ($this->taxRate / (100 + $this->taxRate));
+        return $this->makeAmountHuman($tax);
     }
 
     private function setQuantityToStock(): void

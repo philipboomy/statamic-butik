@@ -128,13 +128,11 @@ class Product extends ButikModel implements Augmentable
     {
         $tax = $data = str_replace(',', '.', $this->tax->percentage);
 
-        $divisor = $tax + 100;
-        $price   = (int) $this->getRawOriginal('price');
+        $price = (int) $this->getRawOriginal('price');
 
-        $totalPriceWithoutTax = $price / $divisor * 100;
-        $tax                  = $price - $totalPriceWithoutTax;
+        $total = $price * ($tax / (100 + $tax));
 
-        return $this->makeAmountHuman(round($tax, 2));
+        return $this->makeAmountHuman(round($total, 2));
     }
 
     /**
