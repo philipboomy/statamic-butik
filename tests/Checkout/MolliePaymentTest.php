@@ -74,27 +74,6 @@ class MolliePaymentTest extends TestCase
     }
 
     /** @test */
-    public function a_failed_payment_will_update_the_order_status()
-    {
-        $order = create(Order::class)->first();
-
-        $paymentResponse     = new MolliePaymentFailed();
-        $paymentResponse->id = $order->transaction_id;
-
-        $this->mockMollie($paymentResponse);
-
-        $this->assertDatabaseHas('butik_orders', ['id' => $order->id, 'status' => 'open']);
-
-        $this->post(route('butik.payment.webhook.mollie'), ['id' => $order->id]);
-        $this->assertDatabaseHas('butik_orders', [
-            'id'             => $order->id,
-            'transaction_id' => $paymentResponse->id,
-            'failed_at'      => Carbon::parse($paymentResponse->failedAt),
-            'status'         => 'failed',
-        ]);
-    }
-
-    /** @test */
     public function an_expired_payment_wont_fire_the_event()
     {
         $this->mockMollie(new MolliePaymentFailed());
@@ -154,7 +133,7 @@ class MolliePaymentTest extends TestCase
 
     public function mockMollie($mock)
     {
-        Mollie::shouldReceive('api->payments->get')
+        Mollie::shouldReceive('api->orders->get')
             ->andReturn($mock);
     }
 }

@@ -138,7 +138,7 @@ class ProductStockTest extends TestCase
 
     public function mockMollie($mock)
     {
-        Mollie::shouldReceive('api->payments->get')
+        Mollie::shouldReceive('api->orders->get')
             ->andReturn($mock);
     }
 }

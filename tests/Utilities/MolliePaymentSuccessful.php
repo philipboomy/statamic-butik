@@ -5,7 +5,6 @@ namespace Jonassiewertsen\StatamicButik\Tests\Utilities;
 class MolliePaymentSuccessful extends MollieResponse {
     public function __construct(){
         $this->amount = new MollieAmount();
-        $this->customer = new MollieCustomer();
     }
 
     public $description = "Nice product";

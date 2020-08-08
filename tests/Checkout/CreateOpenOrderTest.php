@@ -5,7 +5,6 @@ namespace Jonassiewertsen\StatamicButik\Tests\Checkout;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
-use Jonassiewertsen\StatamicButik\Checkout\Cart;
 use Jonassiewertsen\StatamicButik\Checkout\Customer;
 use Jonassiewertsen\StatamicButik\Checkout\Item;
 use Jonassiewertsen\StatamicButik\Checkout\Transaction;
@@ -15,14 +14,13 @@ use Illuminate\Support\Facades\Session;
 use Jonassiewertsen\StatamicButik\Http\Models\Order;
 use Jonassiewertsen\StatamicButik\Http\Models\Product;
 use Jonassiewertsen\StatamicButik\Tests\TestCase;
-use Jonassiewertsen\StatamicButik\Tests\Utilities\MollieCustomer;
 use Jonassiewertsen\StatamicButik\Tests\Utilities\MolliePaymentOpen;
 use Jonassiewertsen\StatamicButik\Tests\Utilities\MolliePaymentSuccessful;
 use Mollie\Laravel\Facades\Mollie;
 
 class CreateOpenOrderTest extends TestCase
 {
-    protected $customer;
+    protected Customer $customer;
     protected $items;
 
     public function setUp(): void
@@ -129,13 +127,11 @@ class CreateOpenOrderTest extends TestCase
     private function checkout()
     {
         $openPayment = new MolliePaymentOpen();
-        Mollie::shouldReceive('api->customers->create')->andReturn(new MollieCustomer());
-        Mollie::shouldReceive('api->payments->create')->andReturn($openPayment);
+
+        Mollie::shouldReceive('api->orders->create')->andReturn($openPayment);
         Mollie::shouldReceive('api->payments->get')->with($openPayment->id)->andReturn($openPayment);
 
-        $totalPrice = $this->items->first()->totalPrice();
-
-        (new MolliePaymentGateway())->handle($this->customer, $this->items, $totalPrice);
+        (new MolliePaymentGateway())->handle($this->customer, $this->items, $openPayment->amount->value);
     }
 
     private function createUserData($key = null, $value = null)

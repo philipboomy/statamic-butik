@@ -21,37 +21,42 @@ class MolliePaymentGateway extends PaymentGateway implements PaymentGatewayInter
     use MoneyTrait;
 
     /**
-     * The total amount we will charge the customer with. The price
-     * needs to be written with dot notation to make Mollie happy.
-     */
-    protected string $totalPrice;
-
-    /**
      * All data from this transaction
      */
     protected Transaction $transaction;
 
     public function handle(Customer $customer, Collection $items, string $totalPrice)
     {
-        $mollieCustomer = Mollie::api()->customers()->create([
-            'name'  => $customer->name,
-            'email' => $customer->mail,
-        ]);
-
         $orderId          = str_random(20);
-        $this->totalPrice = $totalPrice;
 
-        $payment = Mollie::api()
-            ->payments()
-            ->create($this->paymentInformation($items, $mollieCustomer, $orderId));
+//        $payment = Mollie::api()->payments()->get($payment->id);
 
-        $payment = Mollie::api()->payments()->get($payment->id);
+        $payment = Mollie::api()->orders()->create([
+            'amount' => [
+                'currency' => config('butik.currency_isoCode'),
+                'value'    => $totalPrice,
+            ],
+            'billingAddress' => [
+                'givenName'       => $customer->name,
+                'familyName'      => $customer->name,
+                'streetAndNumber' => $customer->address1 . ', ' . $customer->address2,
+                'city'            => $customer->city,
+                'postalCode'      => $customer->zip,
+                'country'         => $customer->country,
+                'email'           => $customer->mail,
+            ],
+            'orderNumber' => $orderId,
+            'locale'      => $this->getLocale(),
+            'webhookUrl' => env('MOLLIE_NGROK_REDIRECT') . route('butik.payment.webhook.mollie', [], false),
+            'redirectUrl' => URL::temporarySignedRoute('butik.payment.receipt', now()->addMinutes(5), ['order' => $orderId]),
+            'lines'       => $this->mapItems($items),
+        ]);
 
         $this->transaction = (new Transaction())
             ->id($orderId)
             ->transactionId($payment->id)
             ->method($payment->method ?? '')
-            ->totalAmount($payment->amount->value)
+            ->totalAmount($totalPrice)
             ->createdAt(Carbon::parse($payment->createdAt))
             ->items($items)
             ->customer($customer);
@@ -67,24 +72,53 @@ class MolliePaymentGateway extends PaymentGateway implements PaymentGatewayInter
         if (!$request->has('id')) {
             return;
         }
-        $payment = Mollie::api()->payments()->get($request->id);
 
-        if ($payment->isPaid()) {
-            $this->setOrderStatusToPaid($payment);
-            event(new PaymentSuccessful($payment));
-        }
+        $payment = Mollie::api()->orders()->get($request->id);
 
-        if ($payment->isFailed()) {
-            $this->setOrderStatusToFailed($payment);
+        switch ($payment->status) {
+            case 'paid':
+                $this->setOrderStatusToPaid($payment);
+                event(new PaymentSuccessful($payment));
+                break;
+            case 'authorized':
+                // TODO: Add authorized action
+                break;
+            case 'completed':
+                // TODO: Add completion action
+                break;
+            case 'expired':
+                $this->setOrderStatusToExpired($payment);
+                break;
+            case 'canceled':
+                $this->setOrderStatusToCanceled($payment);
+                break;
         }
+    }
 
-        if ($payment->isExpired()) {
-            $this->setOrderStatusToExpired($payment);
-        }
-
-        if ($payment->isCanceled()) {
-            $this->setOrderStatusToCanceled($payment);
-        }
+    private function mapItems($items)
+    {
+        return $items->map(function($item) {
+            return [
+                'type'           => 'physical',
+                'sku'            => $item->slug,
+                'name'           => $item->name,
+                'imageUrl'       => $this->images[0] ?? null,
+                'quantity'       => $item->getQuantity(),
+                'vatRate'        => (string) number_format($item->taxRate, 2),
+                'unitPrice'      => [
+                    'currency' => config('butik.currency_isoCode'),
+                    'value'    => $this->humanPriceWithDot($item->singlePrice()),
+                ],
+                'totalAmount'    => [
+                    'currency' => config('butik.currency_isoCode'),
+                    'value'    => $this->humanPriceWithDot($item->totalPrice()),
+                ],
+                'vatAmount'      => [
+                    'currency' => config('butik.currency_isoCode'),
+                    'value'    => $this->humanPriceWithDot($item->taxAmount),
+                ]
+            ];
+        })->toArray();
     }
 
     private function paymentInformation($items, $mollieCustomer, $orderId)
@@ -116,17 +150,6 @@ class MolliePaymentGateway extends PaymentGateway implements PaymentGatewayInter
         }
 
         return $payment;
-    }
-
-    private function generateMetaData($items, $orderId)
-    {
-        $meta = 'ORDER ' . $orderId . ': ';
-
-        foreach ($items as $item) {
-            $meta = $meta . $item->getQuantity() . ' x ' . $item->name . '; ';
-        }
-
-        return $meta;
     }
 
     private function ngrokSet(): bool

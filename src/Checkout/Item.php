@@ -93,13 +93,13 @@ class Item
         $this->available       = $item->available;
         $this->sellable        = true;
         $this->quantity        = 1;
+        $this->singlePrice     = $item->price;
         $this->availableStock  = $item->stock;
         $this->name            = $item->title;
         $this->images          = $this->product->augmentedValue('images')->value();
         $this->description     = $this->limitedDescription();
         $this->taxRate         = $item->tax->percentage;
         $this->taxAmount       = $this->totalTaxAmount();
-        $this->singlePrice     = $item->price;
         $this->totalPrice      = $this->totalPrice();
         $this->shippingProfile = $item->shippingProfile;
     }
