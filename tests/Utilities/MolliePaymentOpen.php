@@ -2,11 +2,8 @@
 
 namespace Jonassiewertsen\StatamicButik\Tests\Utilities;
 
-class MolliePaymentOpen extends MollieResponse {
-    public function __construct(){
-        $this->amount = new MollieAmount();
-    }
-
+class MolliePaymentOpen extends MollieResponse
+{
     public $description = "Nice product";
     public $method      = "PayPal";
     public $status      = "open";
@@ -16,10 +13,16 @@ class MolliePaymentOpen extends MollieResponse {
     public $resource    = "payment";
     public $id          = "tr_fake_id";
     public $orderNumber = "2020_asdeoijasodjfoeasdfasd";
+    public $lines       = [];
     public $mode;
     public $expiresAt;
     public $failedAt;
     public $settlementAmount;
     public $amountRefunded;
     public $amountRemaining;
+
+    public function __construct()
+    {
+        $this->amount = new MollieAmount();
+    }
 }

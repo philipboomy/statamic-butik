@@ -24,10 +24,8 @@ class MolliePaymentGateway extends PaymentGateway implements PaymentGatewayInter
         $payment = Mollie::api()->orders()->create(
             $this->createOrderData($customer, $items, $totalPrice)
         );
-        dd((new Order($payment))->items->first());
+
         event(new OrderCreated(new Order($payment))); // TODO: Change to OrderCreated
-
-
 
         // redirect customer to Mollie checkout page
         return redirect($payment->getCheckoutUrl(), 303);

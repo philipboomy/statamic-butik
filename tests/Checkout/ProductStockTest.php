@@ -5,7 +5,6 @@ namespace Jonassiewertsen\StatamicButik\Tests\Checkout;
 use Illuminate\Support\Facades\Mail;
 use Jonassiewertsen\StatamicButik\Checkout\Item;
 use Jonassiewertsen\StatamicButik\Checkout\Order;
-use Jonassiewertsen\StatamicButik\Http\Models\Order;
 use Jonassiewertsen\StatamicButik\Http\Models\Product;
 use Jonassiewertsen\StatamicButik\Http\Models\Variant;
 use Jonassiewertsen\StatamicButik\Tests\TestCase;
@@ -26,7 +25,6 @@ class ProductStockTest extends TestCase
     /** @test */
     public function the_prodcut_stock_will_be_reduced_by_one_for_a_single_product_after_checkout()
     {
-        $order = create(Order::class, ['transaction_id' => 'tr_fake_id'])->first();
         $stock = Product::first()->stock;
 
         $this->assertEquals($stock, Product::first()->stock);

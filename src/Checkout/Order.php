@@ -4,7 +4,6 @@ namespace Jonassiewertsen\StatamicButik\Checkout;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Mollie\Api\Resources\Order as MollieOrder;
 
 class Order
 {
@@ -20,7 +19,7 @@ class Order
     public Carbon     $createdAt;
     public Carbon     $paidAt;
 
-    public function __construct(MollieOrder $payment)
+    public function __construct($payment)
     {
         $this->id          = $payment->id;
         $this->orderNumber = $payment->orderNumber;
