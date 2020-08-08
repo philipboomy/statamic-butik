@@ -6,15 +6,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Jonassiewertsen\StatamicButik\Checkout\Transaction;
+use Jonassiewertsen\StatamicButik\Checkout\Order;
 
 class PurchaseConfirmation extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    protected Transaction $transaction;
+    protected Order $transaction;
 
-    public function __construct(Transaction $transaction)
+    public function __construct(Order $transaction)
     {
         $this->transaction = $transaction;
     }

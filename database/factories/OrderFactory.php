@@ -2,7 +2,7 @@
 
 use Faker\Generator as Faker;
 use Jonassiewertsen\StatamicButik\Checkout\Item;
-use Jonassiewertsen\StatamicButik\Checkout\Transaction;
+use Jonassiewertsen\StatamicButik\Checkout\Order as CheckoutOrder;
 use Jonassiewertsen\StatamicButik\Http\Models\Order;
 use Jonassiewertsen\StatamicButik\Http\Models\Product;
 
@@ -11,7 +11,7 @@ $factory->define(Order::class, function (Faker $faker) {
     $items = new Item($product->slug);
     $items = collect()->push($items);
 
-    $transaction = (new Transaction())->items($items);
+    $transaction = (new CheckoutOrder())->items($items);
 
     return [
         'id'                => str_random(20),

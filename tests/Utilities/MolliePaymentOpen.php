@@ -2,8 +2,6 @@
 
 namespace Jonassiewertsen\StatamicButik\Tests\Utilities;
 
-
-
 class MolliePaymentOpen extends MollieResponse {
     public function __construct(){
         $this->amount = new MollieAmount();
@@ -17,6 +15,7 @@ class MolliePaymentOpen extends MollieResponse {
     public $canceledAt  = null;
     public $resource    = "payment";
     public $id          = "tr_fake_id";
+    public $orderNumber = "2020_asdeoijasodjfoeasdfasd";
     public $mode;
     public $expiresAt;
     public $failedAt;

@@ -4,7 +4,7 @@ namespace Jonassiewertsen\StatamicButik\Tests\Checkout;
 
 use Illuminate\Support\Facades\Mail;
 use Jonassiewertsen\StatamicButik\Checkout\Item;
-use Jonassiewertsen\StatamicButik\Checkout\Transaction;
+use Jonassiewertsen\StatamicButik\Checkout\Order;
 use Jonassiewertsen\StatamicButik\Http\Models\Order;
 use Jonassiewertsen\StatamicButik\Http\Models\Product;
 use Jonassiewertsen\StatamicButik\Http\Models\Variant;
@@ -46,7 +46,7 @@ class ProductStockTest extends TestCase
         $item = (new Item($product->slug));
         $item->setQuantity(2);
 
-        $transaction = (new Transaction())->items(collect()->push($item));
+        $transaction = (new Order())->items(collect()->push($item));
 
         $order = create(Order::class, [
             'transaction_id' => 'tr_fake_id',
@@ -70,7 +70,7 @@ class ProductStockTest extends TestCase
         $item = (new Item($variant->slug));
         $item->setQuantity(2);
 
-        $transaction = (new Transaction())->items(collect()->push($item));
+        $transaction = (new Order())->items(collect()->push($item));
 
         $order = create(Order::class, [
             'transaction_id' => 'tr_fake_id',
@@ -100,7 +100,7 @@ class ProductStockTest extends TestCase
         $item = (new Item($variant->slug));
         $item->setQuantity(2);
 
-        $transaction = (new Transaction())->items(collect()->push($item));
+        $transaction = (new Order())->items(collect()->push($item));
 
         $order = create(Order::class, [
             'transaction_id' => 'tr_fake_id',

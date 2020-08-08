@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 use Jonassiewertsen\StatamicButik\Checkout\Customer;
-use Jonassiewertsen\StatamicButik\Checkout\Transaction;
+use Jonassiewertsen\StatamicButik\Checkout\Order;
 use Jonassiewertsen\StatamicButik\Http\Models\Order;
 
 class PaymentSuccessful
@@ -21,7 +21,7 @@ class PaymentSuccessful
         $customer   = $this->createCustomer($order);
         $items      = $this->fetchItems($order);
 
-        $this->transaction = (new Transaction())
+        $this->transaction = (new Order())
             ->id($payment->id)
             ->method($payment->method)
             ->customer($customer)

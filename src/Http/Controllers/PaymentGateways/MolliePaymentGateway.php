@@ -2,14 +2,13 @@
 
 namespace Jonassiewertsen\StatamicButik\Http\Controllers\PaymentGateways;
 
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\URL;
 use Jonassiewertsen\StatamicButik\Checkout\Customer;
-use Jonassiewertsen\StatamicButik\Checkout\Transaction;
-use Jonassiewertsen\StatamicButik\Events\PaymentSubmitted;
+use Jonassiewertsen\StatamicButik\Checkout\Order;
+use Jonassiewertsen\StatamicButik\Events\OrderCreated;
 use Jonassiewertsen\StatamicButik\Events\PaymentSuccessful;
 use Jonassiewertsen\StatamicButik\Http\Traits\MollyLocale;
 use Jonassiewertsen\StatamicButik\Http\Traits\MoneyTrait;
@@ -20,48 +19,15 @@ class MolliePaymentGateway extends PaymentGateway implements PaymentGatewayInter
     use MollyLocale;
     use MoneyTrait;
 
-    /**
-     * All data from this transaction
-     */
-    protected Transaction $transaction;
-
     public function handle(Customer $customer, Collection $items, string $totalPrice)
     {
-        $orderId          = str_random(20);
+        $payment = Mollie::api()->orders()->create(
+            $this->createOrderData($customer, $items, $totalPrice)
+        );
+        dd((new Order($payment))->items->first());
+        event(new OrderCreated(new Order($payment))); // TODO: Change to OrderCreated
 
-//        $payment = Mollie::api()->payments()->get($payment->id);
 
-        $payment = Mollie::api()->orders()->create([
-            'amount' => [
-                'currency' => config('butik.currency_isoCode'),
-                'value'    => $totalPrice,
-            ],
-            'billingAddress' => [
-                'givenName'       => $customer->name,
-                'familyName'      => $customer->name,
-                'streetAndNumber' => $customer->address1 . ', ' . $customer->address2,
-                'city'            => $customer->city,
-                'postalCode'      => $customer->zip,
-                'country'         => $customer->country,
-                'email'           => $customer->mail,
-            ],
-            'orderNumber' => $orderId,
-            'locale'      => $this->getLocale(),
-            'webhookUrl' => env('MOLLIE_NGROK_REDIRECT') . route('butik.payment.webhook.mollie', [], false),
-            'redirectUrl' => URL::temporarySignedRoute('butik.payment.receipt', now()->addMinutes(5), ['order' => $orderId]),
-            'lines'       => $this->mapItems($items),
-        ]);
-
-        $this->transaction = (new Transaction())
-            ->id($orderId)
-            ->transactionId($payment->id)
-            ->method($payment->method ?? '')
-            ->totalAmount($totalPrice)
-            ->createdAt(Carbon::parse($payment->createdAt))
-            ->items($items)
-            ->customer($customer);
-
-        event(new PaymentSubmitted($this->transaction));
 
         // redirect customer to Mollie checkout page
         return redirect($payment->getCheckoutUrl(), 303);
@@ -95,6 +61,46 @@ class MolliePaymentGateway extends PaymentGateway implements PaymentGatewayInter
         }
     }
 
+    private function createOrderData($customer, $items, $totalPrice)
+    {
+        $orderData = [
+            'amount' => [
+                'currency' => config('butik.currency_isoCode'),
+                'value'    => $totalPrice,
+            ],
+            'billingAddress' => [
+                'givenName'       => $customer->name,
+                'familyName'      => $customer->name,
+                'streetAndNumber' => $customer->address1 . ', ' . $customer->address2,
+                'city'            => $customer->city,
+                'postalCode'      => $customer->zip,
+                'country'         => $customer->country,
+                'email'           => $customer->mail,
+            ],
+            'orderNumber' => $orderId = now()->format('Ymd_') . str_random(30),
+            'locale'      => $this->getLocale(),
+            'webhookUrl' => env('MOLLIE_NGROK_REDIRECT') . route('butik.payment.webhook.mollie', [], false),
+            'redirectUrl' => URL::temporarySignedRoute('butik.payment.receipt', now()->addMinutes(5), ['order' => $orderId]),
+            'lines'       => $this->mapItems($items),
+        ];
+
+        if (!App::environment(['local'])) {
+            // Only adding the mollie webhook, when not in local environment
+            $orderData = array_merge($orderData, [
+                'webhookUrl' => route('butik.payment.webhook.mollie'),
+            ]);
+        } elseif (App::environment(['local']) && $this->ngrokSet()) {
+            // When local env and the the NGROK has been set, it will add the ngrok url
+            $route = env('MOLLIE_NGROK_REDIRECT') . route('butik.payment.webhook.mollie', [], false);
+
+            $orderData = array_merge($orderData, [
+                'webhookUrl' => $route,
+            ]);
+        }
+
+        return $orderData;
+    }
+
     private function mapItems($items)
     {
         return $items->map(function($item) {
@@ -119,37 +125,6 @@ class MolliePaymentGateway extends PaymentGateway implements PaymentGatewayInter
                 ]
             ];
         })->toArray();
-    }
-
-    private function paymentInformation($items, $mollieCustomer, $orderId)
-    {
-        $payment = [
-            'description' => 'ORDER ' . $orderId,
-            'customerId'  => $mollieCustomer->id,
-            'metadata'    => $this->generateMetaData($items, $orderId),
-            'locale'      => $this->getLocale(),
-            'redirectUrl' => URL::temporarySignedRoute('butik.payment.receipt', now()->addMinutes(5), ['order' => $orderId]),
-            'amount'      => [
-                'currency' => config('butik.currency_isoCode'),
-                'value'    => $this->totalPrice,
-            ],
-        ];
-
-        if (!App::environment(['local'])) {
-            // Only adding the mollie webhook, when not in local environment
-            $payment = array_merge($payment, [
-                'webhookUrl' => route('butik.payment.webhook.mollie'),
-            ]);
-        } elseif (App::environment(['local']) && $this->ngrokSet()) {
-            // When local env and the the NGROK has been set, it will add the ngrok url
-            $route = env('MOLLIE_NGROK_REDIRECT') . route('butik.payment.webhook.mollie', [], false);
-
-            $payment = array_merge($payment, [
-                'webhookUrl' => $route,
-            ]);
-        }
-
-        return $payment;
     }
 
     private function ngrokSet(): bool

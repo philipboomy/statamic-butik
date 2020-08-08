@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Jonassiewertsen\StatamicButik\Checkout\Customer;
 use Jonassiewertsen\StatamicButik\Checkout\Item;
-use Jonassiewertsen\StatamicButik\Checkout\Transaction;
-use Jonassiewertsen\StatamicButik\Events\PaymentSubmitted;
+use Jonassiewertsen\StatamicButik\Checkout\Order;
+use Jonassiewertsen\StatamicButik\Events\OrderCreated;
 use Jonassiewertsen\StatamicButik\Http\Controllers\PaymentGateways\MolliePaymentGateway;
 use Illuminate\Support\Facades\Session;
 use Jonassiewertsen\StatamicButik\Http\Models\Order;
@@ -41,7 +41,7 @@ class CreateOpenOrderTest extends TestCase
     {
         Event::fake();
         $this->checkout();
-        Event::assertDispatched(PaymentSubmitted::class);
+        Event::assertDispatched(OrderCreated::class);
     }
 
     /** @test */
@@ -111,7 +111,7 @@ class CreateOpenOrderTest extends TestCase
     {
         $this->checkout();
 
-        $transaction = (new Transaction())->items($this->items);
+        $transaction = (new Order())->items($this->items);
 
         $this->assertDatabaseHas('butik_orders', ['items' => json_encode($transaction->items)]);
     }
@@ -129,7 +129,7 @@ class CreateOpenOrderTest extends TestCase
         $openPayment = new MolliePaymentOpen();
 
         Mollie::shouldReceive('api->orders->create')->andReturn($openPayment);
-        Mollie::shouldReceive('api->payments->get')->with($openPayment->id)->andReturn($openPayment);
+        Mollie::shouldReceive('api->orders->get')->with($openPayment->id)->andReturn($openPayment);
 
         (new MolliePaymentGateway())->handle($this->customer, $this->items, $openPayment->amount->value);
     }
