@@ -22,7 +22,6 @@ class OrderConfirmationMailTest extends TestCase
     /** @test */
     public function a_purchase_confirmation_mail_will_be_sent_to_the_customer()
     {
-        $this->withoutExceptionHandling();
         $order = create(Order::class)->first();
 
         $payment     = new MolliePaymentSuccessful();

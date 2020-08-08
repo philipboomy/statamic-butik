@@ -56,7 +56,7 @@ class CreateOpenOrderTest extends TestCase
     public function the_order_transaction_id_will_be_identical_with_the_payment_id()
     {
         $this->checkout();
-        $payment = new MolliePaymentSuccessful;
+        $payment = new MolliePaymentSuccessful();
 
         $this->assertDatabaseHas('butik_orders', ['transaction_id' => $payment->id]);
     }
@@ -73,7 +73,7 @@ class CreateOpenOrderTest extends TestCase
     public function the_order_will_have_an_order_type()
     {
         $this->checkout();
-        $payment = new MolliePaymentSuccessful;
+        $payment = new MolliePaymentSuccessful();
 
         $this->assertDatabaseHas('butik_orders', ['method' => $payment->method]);
     }
@@ -82,7 +82,7 @@ class CreateOpenOrderTest extends TestCase
     public function the_order_will_have_an_total_amount()
     {
         $this->checkout();
-        $payment = new MolliePaymentSuccessful;
+        $payment = new MolliePaymentSuccessful();
 
         $value = number_format($payment->amount->value, 0);
 

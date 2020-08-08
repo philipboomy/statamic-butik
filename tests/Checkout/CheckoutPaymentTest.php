@@ -37,8 +37,6 @@ class CheckoutPaymentTest extends TestCase
     /** @test */
     public function the_pament_view_will_be_shown()
     {
-        $this->withoutExceptionHandling();
-
         Session::put('butik.customer', $this->customer);
 
         $this->get(route('butik.checkout.payment'))
