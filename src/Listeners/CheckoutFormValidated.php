@@ -19,7 +19,7 @@ class CheckoutFormValidated
     public function handle(FormSubmitted $event)
     {
         // Simply do nothing in case the butik checkout form has not been called.
-        if ($event->form->form->handle() !== 'butik_checkout') {
+        if ($event->submission->form()->handle() !== 'butik_checkout') {
             return;
         }
 
