@@ -80,12 +80,17 @@ class OrderResource extends ResourceCollection
         $this->columns = $columns->rejectUnlisted()->values();
     }
 
-    private function formatDate(?Carbon $date): ?string
+    private function formatDate($date): ?string
     {
         $format = config('statamic.cp.date_format').' H:i';
 
         if (! $date) {
             return null;
+        }
+
+        // Handle both Carbon instances and string dates
+        if (is_string($date)) {
+            $date = Carbon::parse($date);
         }
 
         return $date->format($format);

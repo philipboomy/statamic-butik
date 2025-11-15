@@ -13,9 +13,14 @@ class Order extends ButikModel
     protected $keyType = 'string';
 
     protected $casts = [
-        'products'   => 'array',
-        'paid_at'    => 'datetime',
-        'shipped_at' => 'datetime',
+        'products'     => 'array',
+        'paid_at'      => 'datetime',
+        'failed_at'    => 'datetime',
+        'canceled_at'  => 'datetime',
+        'shipped_at'   => 'datetime',
+        'completed_at' => 'datetime',
+        'created_at'   => 'datetime',
+        'updated_at'   => 'datetime',
     ];
 
     protected $guarded = [];
