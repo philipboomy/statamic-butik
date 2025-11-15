@@ -133,5 +133,5 @@ return [
      * If you want, you can swap our payment gateway with your own integration.
      * https://butik.dev/extending/payment-gateway
      */
-    'payment_gateway' => Jonassiewertsen\StatamicButik\Http\Controllers\PaymentGateways\MolliePaymentGateway::class,
+    'payment_gateway' => null, // Configure your own payment gateway
 ];

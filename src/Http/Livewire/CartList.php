@@ -6,6 +6,7 @@ use Jonassiewertsen\StatamicButik\Checkout\Cart as ShoppingCart;
 use Jonassiewertsen\StatamicButik\Http\Traits\MapCartItems;
 use Jonassiewertsen\StatamicButik\Shipping\Country;
 use Livewire\Component;
+use Jonassiewertsen\StatamicButik\Http\Livewire\CartIcon;
 
 class CartList extends Component
 {

@@ -65,12 +65,3 @@ Route::namespace('\Jonassiewertsen\StatamicButik\Http\Controllers\Web')
                 ->name('shop.product');
         }
     });
-
-/**
- * #################################################################################################################
- *   Mollie webhook
- * #################################################################################################################.
- */
-Route::post('butik/webhook/mollie', '\\Jonassiewertsen\\StatamicButik\\Http\\Controllers\\Web\\PaymentGatewayController@webhook')
-    ->name('butik.payment.webhook.mollie')
-    ->withoutMiddleware([VerifyCsrfToken::class]);

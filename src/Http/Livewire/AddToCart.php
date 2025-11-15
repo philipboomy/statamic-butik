@@ -4,6 +4,7 @@ namespace Jonassiewertsen\StatamicButik\Http\Livewire;
 
 use Jonassiewertsen\StatamicButik\Checkout\Cart;
 use Livewire\Component;
+use Jonassiewertsen\StatamicButik\Http\Livewire\CartIcon;
 
 class AddToCart extends Component
 {
@@ -21,6 +22,8 @@ class AddToCart extends Component
     public function add()
     {
         Cart::add($this->slug, $this->locale);
+
+        // Dispatch to JavaScript listeners
         $this->dispatch('cartUpdated');
 
         if ($this->redirect) {

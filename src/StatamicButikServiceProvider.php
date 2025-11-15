@@ -18,7 +18,6 @@ use Jonassiewertsen\StatamicButik\Policies\ShippingZonePolicy;
 use Jonassiewertsen\StatamicButik\Policies\TaxPolicy;
 use Jonassiewertsen\StatamicButik\Policies\VariantPolicy;
 use Livewire\Livewire;
-use Mollie\Laravel\MollieServiceProvider;
 use Statamic\Facades\CP\Nav;
 use Statamic\Facades\Permission;
 use Statamic\Providers\AddonServiceProvider;
@@ -204,9 +203,6 @@ class StatamicButikServiceProvider extends AddonServiceProvider
         $this->app->singleton('statamic-butik', function () {
             return new StatamicButik;
         });
-
-        // Registering the service provider
-        $this->app->register(MollieServiceProvider::class);
     }
 
     protected function bootPermissions(): void
