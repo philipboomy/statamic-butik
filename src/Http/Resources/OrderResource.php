@@ -14,7 +14,6 @@ class OrderResource extends ResourceCollection
 {
     use HasRequestedColumns;
 
-    public $collects = Order::class;
     protected $blueprint;
     protected $columns;
 
