@@ -16,4 +16,15 @@ abstract class ButikModel extends Model
     {
         return config('butik.route_shop-prefix');
     }
+
+    /**
+     * Get the JSON encoding options for the model.
+     * This method provides Laravel 9+ compatibility for Laravel 8.
+     *
+     * @return int
+     */
+    public function jsonOptions()
+    {
+        return 0;
+    }
 }
