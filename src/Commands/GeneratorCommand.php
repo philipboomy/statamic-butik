@@ -4,11 +4,11 @@ namespace Jonassiewertsen\StatamicButik\Commands;
 
 use Statamic\Console\Commands\GeneratorCommand as StatamicGeneratorCommand;
 
-class GeneratorCommand extends StatamicGeneratorCommand
+abstract class GeneratorCommand extends StatamicGeneratorCommand
 {
     /**
      * We need to do this ourselves so it uses the
-     * Simple Commerce stub path.
+     * Butik stub path.
      *
      * @return string
      */
