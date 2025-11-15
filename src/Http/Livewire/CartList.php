@@ -28,13 +28,13 @@ class CartList extends Component
     public function add($slug)
     {
         ShoppingCart::add($slug, $this->locale);
-        $this->emit('cartUpdated');
+        $this->dispatch('cartUpdated');
     }
 
     public function reduce($slug)
     {
         ShoppingCart::reduce($slug);
-        $this->emit('cartUpdated');
+        $this->dispatch('cartUpdated');
     }
 
     public function render()

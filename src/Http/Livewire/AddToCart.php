@@ -21,7 +21,7 @@ class AddToCart extends Component
     public function add()
     {
         Cart::add($this->slug, $this->locale);
-        $this->emit('cartUpdated');
+        $this->dispatch('cartUpdated');
 
         if ($this->redirect) {
             return redirect(route('butik.cart'));
