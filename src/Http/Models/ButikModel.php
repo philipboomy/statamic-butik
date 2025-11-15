@@ -19,12 +19,19 @@ abstract class ButikModel extends Model
 
     /**
      * Get the JSON encoding options for the model.
-     * This method provides Laravel 9+ compatibility for Laravel 8.
+     * Provides backwards compatibility for Laravel 8.
+     * In Laravel 9+, this method exists natively in the Model class.
      *
      * @return int
      */
     public function jsonOptions()
     {
+        // Check if parent has this method (Laravel 9+)
+        if (method_exists(get_parent_class($this), 'jsonOptions')) {
+            return parent::jsonOptions();
+        }
+
+        // Default for Laravel 8
         return 0;
     }
 }

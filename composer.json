@@ -28,17 +28,17 @@
         "email": "mail@jonassiewertsen.com"
     },
     "require": {
-        "php": "^7.4 || ^8.0 || ^8.1",
+        "php": "^8.0 || ^8.1 || ^8.2",
         "doctrine/dbal": "^2.10 || ^3.0",
-        "illuminate/support": "^8.0",
+        "illuminate/support": "^8.0 || ^9.0 || ^10.0",
         "jonassiewertsen/statamic-livewire": "^2.0",
         "mollie/laravel-mollie": "^2.0",
-        "statamic/cms": "^3.4",
+        "statamic/cms": "^3.4 || ^4.0",
         "symfony/intl": "^5.1 || ^6.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^5.0 || ^6.0",
-        "phpunit/phpunit": "^8.5 || ^9.3",
+        "orchestra/testbench": "^5.0 || ^6.0 || ^7.0 || ^8.0",
+        "phpunit/phpunit": "^8.5 || ^9.3 || ^10.0",
         "laravel/legacy-factories": "^1.0.4"
     },
     "autoload": {
