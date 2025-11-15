@@ -23,6 +23,6 @@ class CheckoutFormValidated
             return;
         }
 
-        (new CheckoutController())->storeCustomerData($event->submission->data());
+        (new CheckoutController())->storeCustomerData($event->submission->data()->all());
     }
 }
