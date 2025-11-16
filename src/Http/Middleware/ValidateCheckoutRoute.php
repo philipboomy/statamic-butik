@@ -10,10 +10,8 @@ class ValidateCheckoutRoute
     public function handle($request, Closure $next)
     {
         $customer = session()->get('butik.customer');
-        \Log::info('ValidateCheckoutRoute middleware', ['customer' => $customer ? $customer->email : 'null']);
 
         if (! $this->customerDataComplete($customer)) {
-            \Log::warning('Customer data incomplete, redirecting to delivery page');
             return redirect(route('butik.checkout.delivery'));
         }
 
