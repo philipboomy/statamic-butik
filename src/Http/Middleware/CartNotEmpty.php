@@ -9,7 +9,11 @@ class CartNotEmpty
 {
     public function handle($request, Closure $next)
     {
-        if (Cart::totalItems() === 0) {
+        $totalItems = Cart::totalItems();
+        \Log::info('CartNotEmpty middleware', ['total_items' => $totalItems]);
+
+        if ($totalItems === 0) {
+            \Log::warning('Cart is empty, redirecting to cart page');
             return redirect()->route('butik.cart');
         }
 
