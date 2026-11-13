@@ -22,7 +22,9 @@ class OrdersController
 
         $activeFilterBadges = $this->queryFilters($query, $request->filters);
 
-        $orders = $this->paginatedOrders($query->get());
+        $orders = $this->sortByCustomerField($query->get());
+
+        $orders = $this->paginatedOrders($orders);
 
         return (new OrderResource($orders))
             ->columnPreferenceKey('butik.orders.columns')
@@ -37,14 +39,52 @@ class OrdersController
      */
     private function fetchOrders(): Builder
     {
-        $sortOrder = request('order') ?? 'desc';
+        $sortOrder = $this->sortOrder();
         $sortBy = request('sort') ?? 'created_at';
 
-        if (! request()->filled('search')) {
-            return Order::orderBy($sortBy, $sortOrder);
+        // Columns like "name" and "email" are derived from the customer JSON and don't
+        // exist in the table, so fall back to created_at and sort those in PHP later.
+        if (! in_array($sortBy, self::SORTABLE_COLUMNS, true)) {
+            $sortBy = 'created_at';
         }
 
-        return $this->searchOrders();
+        $query = request()->filled('search') ? $this->searchOrders() : Order::query();
+
+        return $query->orderBy($sortBy, $sortOrder);
+    }
+
+    private const SORTABLE_COLUMNS = [
+        'id', 'number', 'status', 'method', 'total_amount',
+        'created_at', 'paid_at', 'failed_at', 'canceled_at', 'shipped_at', 'completed_at',
+    ];
+
+    private function sortOrder(): string
+    {
+        return strtolower((string) request('order')) === 'asc' ? 'asc' : 'desc';
+    }
+
+    /**
+     * Sort by fields that live inside the customer JSON (not real table columns).
+     */
+    private function sortByCustomerField($orders)
+    {
+        $sortBy = request('sort');
+
+        if (! in_array($sortBy, ['name', 'email'], true)) {
+            return $orders;
+        }
+
+        $sorted = $orders->sortBy(function ($order) use ($sortBy) {
+            $customer = $order->customer;
+
+            $value = $sortBy === 'name'
+                ? ($customer->firstname ?? '').' '.($customer->surname ?? '')
+                : ($customer->email ?? '');
+
+            return mb_strtolower(trim($value));
+        }, SORT_NATURAL, $this->sortOrder() === 'desc');
+
+        return $sorted->values();
     }
 
     /**
